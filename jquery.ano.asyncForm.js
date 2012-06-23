@@ -50,7 +50,7 @@
 
             this._form = {
                 action: $form.attr('action'),
-                method: $form.attr('method').toUpperCase()
+                method: $form.attr('method').toUpperCase(),
             };
         },
 
@@ -80,6 +80,7 @@
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     self._trigger("error", event, {xhr: jqXHR, status: textStatus, error: errorThrown});
+                    self._onError(jqXHR, errorThrown);
                 },
                 success: function(data, textStatus, jqXHR) {
                     self._onComplete(data, textStatus, jqXHR);
@@ -95,16 +96,87 @@
             this._trigger("success", event, {xhr: jqXHR, status: textStatus, data: data});
         },
 
+
+        // Error handling
+
+        _onError: function(xhr, error) {
+            var self = this;
+            self._debug('Error ' + xhr.status + ' (' + error + ')');
+
+            switch (xhr.status) {
+                case 400:
+                    self._trigger("badRequestError", null, {xhr: xhr, error: error});
+                    self._onErrorBadRequest(xhr, error);
+                    break;
+                case 500:
+
+                    break;
+
+            }
+        },
+
+        _onErrorBadRequest: function(xhr, error) {
+            var self = this, response = $.parseJSON(xhr.responseText);
+            if ((typeof response.form === 'undefined') || (typeof response.form.children === 'undefined')) {
+                return;
+            }
+
+            self._debug('Iterating errors...');
+
+            var inputName = '';
+            var errorWalk = function(name) {
+                var child = this, thisInputName = inputName + '[' + name + ']';
+
+                if (child.hasOwnProperty('errors') && child.errors.length) {
+                    self._renderErrors(thisInputName, child.errors);
+                }
+
+                if (child.hasOwnProperty('children')) {
+                    inputName += '[' + name + ']';
+                    $.each(child.children, errorWalk);
+                }
+            };
+
+            $.each(response.form.children, errorWalk);
+        },
+
+        _renderErrors: function(inputName, errors) {
+            var self = this;
+            var element = $('<ul class="input-error-container"></ul>')
+                .hide();
+
+            $.each(errors, function(i) {
+                self._debug('Error for input "' + inputName + '" : ' + this);
+
+                element.append(self._renderError(this));
+            });
+
+            element
+                .insertAfter(self.element.find(':input[name*="' + inputName + '"]'))
+                .fadeIn()
+            ;
+        },
+
+        _renderError: function(error) {
+            var element = $('<li class="input-error"></li>');
+
+            return element.text(error);
+        },
+
         _serialize: function() {
             var self = this, data = {};
 
             self._trigger("beforeSerialize", null, {data: data});
-
             data = $.extend(data, self.element.serializeObject());
-
             self._trigger("afterSerialize", null, {data: data});
 
             return data;
+        },
+
+        _debug: function(message) {
+            if (this.options.debug && !(typeof console == 'undefined'))  {
+                console.log(message);
+            }
         },
 
         // PUBLIC methods
