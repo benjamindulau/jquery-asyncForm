@@ -50,7 +50,7 @@
 
             this._form = {
                 action: $form.attr('action'),
-                method: $form.attr('method').toUpperCase(),
+                method: $form.attr('method').toUpperCase()
             };
         },
 
@@ -83,17 +83,19 @@
                     self._onError(jqXHR, errorThrown);
                 },
                 success: function(data, textStatus, jqXHR) {
-                    self._onComplete(data, textStatus, jqXHR);
+                    self._onComplete(jqXHR, data);
                 }
             });
         },
 
-        _onComplete: function(data, textStatus, jqXHR) {
-            if (data.redirect) {
-                return top.window.location.replace(data.redirect);
+        _onComplete: function(xhr, data) {
+            var location = xhr.getResponseHeader('location');
+
+            if (location) {
+                return window.location.replace(location);
             }
 
-            this._trigger("success", event, {xhr: jqXHR, status: textStatus, data: data});
+            this._trigger("success", event, {xhr: xhr, data: data});
         },
 
 
@@ -141,7 +143,7 @@
         },
 
         _renderErrors: function(inputName, errors) {
-            var self = this;
+            var self = this, inputElement;
             var element = $('<ul class="input-error-container"></ul>')
                 .hide();
 
@@ -151,10 +153,21 @@
                 element.append(self._renderError(this));
             });
 
-            element
-                .insertAfter(self.element.find(':input[name*="' + inputName + '"]'))
-                .fadeIn()
-            ;
+            inputElement = self.element.find(':input[name*="' + inputName + '"]');
+
+            if (inputElement.length) {
+                // removing existing error element
+                inputElement
+                    .next('.input-error-container')
+                    .remove()
+                ;
+
+                // appending error element
+                element
+                    .insertAfter(inputElement)
+                    .fadeIn()
+                ;
+            }
         },
 
         _renderError: function(error) {
@@ -187,48 +200,3 @@
     });
 
 }(jQuery));
-
-/*
-<script id="ano-uploader-tmpl" type="text/x-jquery-tmpl">
-    <div id="ano-uploader-ui" class="ano-uploader-ui">
-        <div class="dg-dp-area">
-            <p class="dg-dp-text">
-                Drag and drop photos here.
-            </p>
-            <div class="button" data-button="add">
-                <span class="text">Choose photos on this computer</span>
-            </div>
-            <div class="uploaded-files">
-                <ul class="file-list">
-                    {{each photos tmpl="#ano-uploader-file-tmpl"}}
-                </ul>
-            </div>
-            <div class="progressbar progress-all">
-                <div class="progress"></div>
-            </div>
-            <input id="file" type="file" name="files[]" multiple="multiple" />
-        </div>
-    </div>
-</script>
-
-<script id="ano-uploader-file-tmpl" type="text/x-jquery-tmpl">
-    <li class="file-item" data-id="{{=id}}" data-type="file" data-index="{{=$ctx.fileIndex($view)}}">
-        <div class="wrapper">
-            <div class="thumbnail-area">
-                <img src="{{=media.content}}" alt="" class="thumbnail" />
-            </div>
-            <a href="#" title="Delete" class="action-delete" data-action="delete"><span>[x]</span></a>
-            <a href="#" class="action-rotate" data-action="rotate" title="Pivoter de 90°" tabindex="-1" onclick="return false">
-                <span>Rotate 90°</span>
-            </a>
-
-            <div class="progressbar">
-                <div class="progress"></div>
-            </div>
-            <div class="messages">
-                <ul class="message-list"></ul>
-            </div>
-        </div>
-    </li>
-</script>
-*/
