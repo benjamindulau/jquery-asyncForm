@@ -127,9 +127,14 @@
 
             var inputName = '';
             var errorWalk = function(name) {
-                var child = this, thisInputName = inputName + '[' + name + ']';
+                var
+                    child = this,
+                    thisInputName = inputName + '[' + name + ']'
+                    thisInputElement = self.element.find(':input[name*="' + thisInputName + '"]')
+                ;
 
                 if (child.hasOwnProperty('errors') && child.errors.length) {
+                    self._trigger("inputError", null, {xhr: xhr, error: error, input: thisInputElement});
                     self._renderErrors(thisInputName, child.errors);
                 }
 
