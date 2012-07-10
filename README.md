@@ -84,7 +84,7 @@ content should be a well structured JSON object like the following:
                 "errors": ["This value is too short. It should have 3 characters or more"]
             },
             "description": {
-                "errors": ["This value is too short. It should have 3 characters or more"]
+                "errors": ["Please provide a description."]
             }
         }
     }
