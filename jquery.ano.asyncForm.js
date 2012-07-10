@@ -119,7 +119,18 @@
 
         _onErrorBadRequest: function(xhr, error) {
             var self = this, response = $.parseJSON(xhr.responseText);
-            if ((typeof response.form === 'undefined') || (typeof response.form.children === 'undefined')) {
+            if (typeof response.form === 'undefined') {
+                return;
+            }
+
+            // General form errors
+            if (!(typeof response.form.errors === 'undefined') && response.form.errors.length) {
+                self._trigger("bubbledErrors", null, {xhr: xhr, errors: response.form.errors});
+                self._renderBubbledErrors(response.form.errors);
+            }
+
+            // Form field errors
+            if (typeof response.form.children === 'undefined') {
                 return;
             }
 
@@ -129,13 +140,13 @@
             var errorWalk = function(name) {
                 var
                     child = this,
-                    thisInputName = inputName + '[' + name + ']'
+                    thisInputName = inputName + '[' + name + ']',
                     thisInputElement = self.element.find(':input[name*="' + thisInputName + '"]')
                 ;
 
                 if (child.hasOwnProperty('errors') && child.errors.length) {
                     self._trigger("inputError", null, {xhr: xhr, error: error, input: thisInputElement});
-                    self._renderErrors(thisInputName, child.errors);
+                    self._renderFieldErrors(thisInputName, child.errors);
                 }
 
                 if (child.hasOwnProperty('children')) {
@@ -147,15 +158,42 @@
             $.each(response.form.children, errorWalk);
         },
 
-        _renderErrors: function(inputName, errors) {
+        _renderBubbledErrors: function(errors) {
+            var self = this;
+            var element = $('<ul class="bubbled-error-container"></ul>')
+                .hide();
+
+            $.each(errors, function(i) {
+                self._debug('Bubbled error: ' + this);
+
+                element.append(self._renderBubbledError(this));
+            });
+
+            // removing existing error element
+            this.element.find('.bubbled-error-container').remove();
+
+            // appending error element
+            element
+                .prependTo(this.element)
+                .fadeIn()
+            ;
+        },
+
+        _renderBubbledError: function(error) {
+            var element = $('<li class="bubbled-error"></li>');
+
+            return element.text(error);
+        },
+
+        _renderFieldErrors: function(inputName, errors) {
             var self = this, inputElement;
             var element = $('<ul class="input-error-container"></ul>')
                 .hide();
 
             $.each(errors, function(i) {
-                self._debug('Error for input "' + inputName + '" : ' + this);
+                self._debug('Error for input "' + inputName + '": ' + this);
 
-                element.append(self._renderError(this));
+                element.append(self._renderFieldError(this));
             });
 
             inputElement = self.element.find(':input[name*="' + inputName + '"]');
@@ -175,7 +213,7 @@
             }
         },
 
-        _renderError: function(error) {
+        _renderFieldError: function(error) {
             var element = $('<li class="input-error"></li>');
 
             return element.text(error);
@@ -200,7 +238,11 @@
         // PUBLIC methods
 
         options: {
-
+            debug: false,
+            errors: {
+                renderBubbledErrors: true,
+                renderFieldErrors: true
+            }
         }
     });
 
