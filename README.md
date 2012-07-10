@@ -2,11 +2,11 @@
 
 ## Introduction
 
-This unobtrusive widget handle any form submission by ajax instead of the default behaviour.
+This unobtrusive widget handles any form submission by asynchronous request instead of the default behaviour.
 
 ## Usage
 
-The example below also uses Twitter bootstrap ;-)
+Note that the example below also uses Twitter bootstrap ;-)
 
 ```javascript
 $('#my-form').asyncForm({
@@ -36,11 +36,10 @@ $('#my-form').asyncForm({
 The following options are availabled:
 
  - debug
- -
-     errors: {
-         renderBubbledErrors: true,
-         renderFieldErrors: true
-     }
+ - errors: {
+       renderBubbledErrors: true,
+       renderFieldErrors: true
+   }
 
 ### Events
 
@@ -67,7 +66,7 @@ And especially the following codes :
  - 500 => server error of course
 
 When a "400 Bad Request" response is returned by the server, and in order to handle validation errors, the response
-content should be a well formated JSON object, with the following structure:
+content should be a well structured JSON object like the following:
 
 ```json
 {
