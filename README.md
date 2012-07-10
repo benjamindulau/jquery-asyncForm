@@ -4,6 +4,13 @@
 
 This unobtrusive widget handles any form submission by asynchronous request instead of the default behaviour.
 
+## TODO
+
+The widget is really new so there still is a lot to do.
+It is developed in sync with one of our current project, so any useful behaviour will be
+added regularly ;-)
+
+
 ## Usage
 
 Note that the example below also uses Twitter bootstrap ;-)
