@@ -76,10 +76,10 @@
                     self._trigger("beforeSend", event, {xhr: jqXHR});
                 },
                 complete: function(jqXHR, textStatus) {
-                    self._trigger("complete", event, {xhr: jqXHR, status: textStatus});
+                    self._trigger("complete", event, {xhr: jqXHR, status: textStatus, element: self.element});
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    self._trigger("error", event, {xhr: jqXHR, status: textStatus, error: errorThrown});
+                    self._trigger("error", event, {xhr: jqXHR, status: textStatus, error: errorThrown, element: self.element});
                     self._onError(jqXHR, errorThrown);
                 },
                 success: function(data, textStatus, jqXHR) {
@@ -107,7 +107,7 @@
 
             switch (xhr.status) {
                 case 400:
-                    self._trigger("badRequestError", null, {xhr: xhr, error: error});
+                    self._trigger("badRequestError", null, {xhr: xhr, error: error, element: self.element});
                     self._onErrorBadRequest(xhr, error);
                     break;
                 case 500:
@@ -125,7 +125,7 @@
 
             // General form errors
             if (!(typeof response.form.errors === 'undefined') && response.form.errors.length) {
-                self._trigger("bubbledErrors", null, {xhr: xhr, errors: response.form.errors});
+                self._trigger("bubbledErrors", null, {xhr: xhr, errors: response.form.errors, element: self.element});
                 self._renderBubbledErrors(response.form.errors);
             }
 
@@ -145,7 +145,7 @@
                 ;
 
                 if (child.hasOwnProperty('errors') && child.errors.length) {
-                    self._trigger("inputError", null, {xhr: xhr, error: error, input: thisInputElement});
+                    self._trigger("inputError", null, {xhr: xhr, error: error, input: thisInputElement, element: self.element});
                     self._renderFieldErrors(thisInputName, child.errors);
                 }
 
