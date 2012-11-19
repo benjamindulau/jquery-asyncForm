@@ -95,7 +95,7 @@
                 return window.location.replace(location);
             }
 
-            this._trigger("success", event, {xhr: xhr, data: data});
+            this._trigger("success", event, {xhr: xhr, data: data, element: this.element});
         },
 
 
